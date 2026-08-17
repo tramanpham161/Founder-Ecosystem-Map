@@ -174,7 +174,7 @@ export const EcosystemMap: React.FC<EcosystemMapProps> = ({
     if (bounds.isValid()) {
       map.fitBounds(bounds, {
         padding: [35, 35],
-        maxZoom: 7,
+        maxZoom: 8,
         animate: true,
       });
     }
