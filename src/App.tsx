@@ -4,6 +4,7 @@ import {
   LocationOption,
   DemographicOption,
   StageOption,
+  CrossCuttingPillar,
 } from './types';
 import {
   ORGANISATIONS,
@@ -15,12 +16,14 @@ import { EcosystemMap } from './components/EcosystemMap';
 import { OrganisationDetail } from './components/OrganisationDetail';
 import { OrganisationTable } from './components/OrganisationTable';
 import { SendMessageModal } from './components/SendMessageModal';
+import { TalkToUsModal } from './components/TalkToUsModal';
 
 export default function App() {
   // State for Filters
   const [selectedLocations, setSelectedLocations] = useState<LocationOption[]>([]);
   const [selectedDemographics, setSelectedDemographics] = useState<DemographicOption[]>([]);
   const [selectedStage, setSelectedStage] = useState<StageOption | null>(null);
+  const [selectedPillar, setSelectedPillar] = useState<CrossCuttingPillar | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   // Selected organisation for Map & Detail sync (default null so full UK map is in view)
@@ -29,6 +32,7 @@ export default function App() {
   // Modal States
   const [modalOrg, setModalOrg] = useState<Organisation | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isTalkToUsOpen, setIsTalkToUsOpen] = useState(false);
 
   // Toggle Location in multi-select
   const handleToggleLocation = (loc: LocationOption) => {
@@ -65,6 +69,7 @@ export default function App() {
     setSelectedLocations([]);
     setSelectedDemographics([]);
     setSelectedStage(null);
+    setSelectedPillar(null);
     setSearchQuery('');
   };
 
@@ -92,7 +97,12 @@ export default function App() {
         if (!org.stages.includes(selectedStage)) return false;
       }
 
-      // 4. Search query
+      // 4. Continuous Cross-Cutting Pillar match
+      if (selectedPillar) {
+        if (!org.crossCuttingPillars?.includes(selectedPillar)) return false;
+      }
+
+      // 5. Search query
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         const matchesQuery =
@@ -108,7 +118,7 @@ export default function App() {
 
       return true;
     });
-  }, [selectedLocations, selectedDemographics, selectedStage, searchQuery]);
+  }, [selectedLocations, selectedDemographics, selectedStage, selectedPillar, searchQuery]);
 
   // Ensure selected organisation is reset if it no longer matches active filters
   React.useEffect(() => {
@@ -157,6 +167,39 @@ export default function App() {
     return counts;
   }, [selectedLocations, selectedDemographics]);
 
+  // Compute Cross-Cutting Pillar counts based on current region & demographic filter
+  const pillarCounts = useMemo(() => {
+    const baseFiltered = ORGANISATIONS.filter((org) => {
+      if (selectedLocations.length > 0 && !selectedLocations.includes('UK')) {
+        const matchNation = selectedLocations.some((loc) => org.nation === loc);
+        if (!matchNation) return false;
+      }
+      if (selectedDemographics.length > 0) {
+        const matchesDemo = selectedDemographics.some((demo) =>
+          org.demographics.includes(demo)
+        );
+        if (!matchesDemo) return false;
+      }
+      return true;
+    });
+
+    const counts: Record<CrossCuttingPillar, number> = {
+      'Mentoring & networking': 0,
+      'Policy, evidence & ecosystem influence': 0,
+      'Community & social capital': 0,
+    };
+
+    baseFiltered.forEach((org) => {
+      org.crossCuttingPillars?.forEach((pillar) => {
+        if (counts[pillar] !== undefined) {
+          counts[pillar]++;
+        }
+      });
+    });
+
+    return counts;
+  }, [selectedLocations, selectedDemographics]);
+
   const handleSelectOrganisation = (org: Organisation) => {
     setSelectedOrganisation(org);
   };
@@ -175,6 +218,7 @@ export default function App() {
     selectedLocations.length > 0 ||
     selectedDemographics.length > 0 ||
     selectedStage !== null ||
+    selectedPillar !== null ||
     searchQuery.trim().length > 0;
 
   return (
@@ -195,16 +239,21 @@ export default function App() {
         onToggleDemographic={handleToggleDemographic}
         selectedStage={selectedStage}
         onClearStage={() => setSelectedStage(null)}
+        selectedPillar={selectedPillar}
+        onClearPillar={() => setSelectedPillar(null)}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         totalFilteredCount={filteredOrganisations.length}
       />
 
-      {/* 3. Horizontal Stage Scale (OAHA Solid Colors, Sized Circles with Connecting Pipeline Line) */}
+      {/* 3. Horizontal Stage & Cross-Cutting Scale */}
       <StageScale
         stageCounts={stageCounts}
         selectedStage={selectedStage}
         onSelectStage={setSelectedStage}
+        pillarCounts={pillarCounts}
+        selectedPillar={selectedPillar}
+        onSelectPillar={setSelectedPillar}
         totalFiltered={filteredOrganisations.length}
       />
 
@@ -241,15 +290,40 @@ export default function App() {
         onOpenMessageModal={handleOpenMessageModal}
       />
 
-      {/* 6. Clean Footer */}
+      {/* 6. Simple Talk to Us Call to Action */}
+      <section className="bg-white border-t border-[#e1e1db] py-8 px-4 sm:px-6 lg:px-8 text-center">
+        <div className="max-w-md mx-auto space-y-2">
+          <p className="text-xs text-[#51615a]">
+            Looking for something specific or want to update your organisation's listing?
+          </p>
+          <div>
+            <button
+              id="talk-to-us-cta-btn"
+              onClick={() => setIsTalkToUsOpen(true)}
+              className="inline-flex items-center justify-center px-5 py-2.5 bg-[#F79B1C] hover:bg-[#e08912] text-white text-xs font-semibold rounded-lg transition-colors shadow-2xs cursor-pointer"
+            >
+              Talk to us
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* 7. Clean Footer */}
       <footer className="bg-[#fbfbf9] border-t border-[#e1e1db] py-5 px-4 sm:px-6 lg:px-8 text-xs text-[#51615a]">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
           <p>
             © {new Date().getFullYear()} OAHA • UK Founder Ecosystem & Stage Map
           </p>
-          <p className="text-[11px] text-[#8a9091]">
-            Comprehensive regional and stage mapping for UK enterprise support
-          </p>
+          <div className="flex items-center gap-3 text-[11px] text-[#8a9091]">
+            <span>Comprehensive regional and stage mapping for UK enterprise support</span>
+            <span>•</span>
+            <button
+              onClick={() => setIsTalkToUsOpen(true)}
+              className="text-[#1a2521] hover:underline font-semibold cursor-pointer"
+            >
+              Talk to us
+            </button>
+          </div>
         </div>
       </footer>
 
@@ -258,6 +332,12 @@ export default function App() {
         organisation={modalOrg}
         isOpen={isModalOpen}
         onClose={handleCloseMessageModal}
+      />
+
+      {/* Talk to Us Modal */}
+      <TalkToUsModal
+        isOpen={isTalkToUsOpen}
+        onClose={() => setIsTalkToUsOpen(false)}
       />
     </div>
   );
