@@ -262,7 +262,7 @@ export const OrganisationDetail: React.FC<OrganisationDetailProps> = ({
         <button
           id="send-direct-message-btn"
           onClick={() => onOpenMessageModal(organisation)}
-          className="bg-[#3EB049] hover:bg-[#34993e] text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors shrink-0"
+          className="bg-[#F79B1C] hover:bg-[#e08912] text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors shrink-0 cursor-pointer shadow-2xs"
         >
           Send message
         </button>
