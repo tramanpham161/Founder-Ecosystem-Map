@@ -3,11 +3,106 @@ import {
   LocationOption,
   DemographicOption,
   StageOption,
+  CrossCuttingPillar,
   SectorOption,
   StatusOption,
 } from '../types';
 
-export const ORGANISATIONS: Organisation[] = [
+export const CROSS_CUTTING_PILLARS: CrossCuttingPillar[] = [
+  'Mentoring & networking',
+  'Policy, evidence & ecosystem influence',
+  'Community & social capital',
+];
+
+export const CROSS_CUTTING_CONFIG: Record<
+  CrossCuttingPillar,
+  {
+    title: string;
+    subtitle: string;
+    description: string;
+    scope: string;
+    icon: string;
+    color: string;
+    lightBg: string;
+    borderColor: string;
+    tagColor: string;
+  }
+> = {
+  'Mentoring & networking': {
+    title: 'Mentoring & networking',
+    subtitle: '1:1 advisory, peer cohorts & executive networks',
+    description: 'Ongoing 1-on-1 mentorship, peer advisory circles, founder masterminds, technical coaching, and angel introductions.',
+    scope: 'Runs throughout Stages 01 → 05',
+    icon: '🤝',
+    color: '#26B7BD',
+    lightBg: 'bg-[#26B7BD]/10',
+    borderColor: 'border-[#26B7BD]/30',
+    tagColor: 'text-[#166e73] bg-[#26B7BD]/15 border-[#26B7BD]/30',
+  },
+  'Policy, evidence & ecosystem influence': {
+    title: 'Policy, evidence & ecosystem influence',
+    subtitle: 'Research, advocacy & institutional enablement',
+    description: 'Ecosystem research, regional devolution evidence, systemic diversity data reporting, policy advocacy, and public co-investment.',
+    scope: 'Runs throughout Stages 01 → 05',
+    icon: '🏛️',
+    color: '#1A2521',
+    lightBg: 'bg-[#1A2521]/10',
+    borderColor: 'border-[#1A2521]/30',
+    tagColor: 'text-[#1a2521] bg-[#1a2521]/10 border-[#1a2521]/20',
+  },
+  'Community & social capital': {
+    title: 'Community & social capital',
+    subtitle: 'Safe spaces, grassroots hubs & founder resilience',
+    description: 'Grassroots community hubs, founder mental wellbeing circles, safe identity spaces, cultural belonging, and network trust equity.',
+    scope: 'Runs throughout Stages 01 → 05',
+    icon: '🌐',
+    color: '#3EB049',
+    lightBg: 'bg-[#3EB049]/10',
+    borderColor: 'border-[#3EB049]/30',
+    tagColor: 'text-[#2c8535] bg-[#3EB049]/15 border-[#3EB049]/30',
+  },
+};
+
+const PILLARS_BY_ORG_ID: Record<string, CrossCuttingPillar[]> = {
+  'org-eng-1': ['Mentoring & networking', 'Community & social capital'],
+  'org-eng-2': ['Mentoring & networking', 'Policy, evidence & ecosystem influence'],
+  'org-eng-3': ['Mentoring & networking', 'Policy, evidence & ecosystem influence', 'Community & social capital'],
+  'org-eng-4': ['Mentoring & networking', 'Community & social capital'],
+  'org-eng-5': ['Policy, evidence & ecosystem influence', 'Community & social capital'],
+  'org-eng-6': ['Community & social capital', 'Mentoring & networking'],
+  'org-eng-7': ['Mentoring & networking', 'Community & social capital'],
+  'org-eng-8': ['Policy, evidence & ecosystem influence', 'Mentoring & networking'],
+  'org-scot-1': ['Community & social capital', 'Mentoring & networking'],
+  'org-scot-2': ['Mentoring & networking', 'Policy, evidence & ecosystem influence'],
+  'org-scot-3': ['Mentoring & networking', 'Community & social capital', 'Policy, evidence & ecosystem influence'],
+  'org-scot-4': ['Community & social capital', 'Mentoring & networking'],
+  'org-scot-5': ['Policy, evidence & ecosystem influence', 'Mentoring & networking'],
+  'org-wales-1': ['Community & social capital', 'Mentoring & networking', 'Policy, evidence & ecosystem influence'],
+  'org-wales-2': ['Mentoring & networking', 'Policy, evidence & ecosystem influence'],
+  'org-wales-3': ['Mentoring & networking', 'Community & social capital'],
+  'org-wales-4': ['Community & social capital', 'Policy, evidence & ecosystem influence'],
+  'org-ni-1': ['Mentoring & networking', 'Community & social capital'],
+  'org-ni-2': ['Community & social capital', 'Mentoring & networking', 'Policy, evidence & ecosystem influence'],
+  'org-ni-3': ['Policy, evidence & ecosystem influence', 'Community & social capital'],
+  'org-ni-4': ['Mentoring & networking', 'Policy, evidence & ecosystem influence'],
+  'org-uk-1': ['Mentoring & networking', 'Community & social capital', 'Policy, evidence & ecosystem influence'],
+  'org-uk-2': ['Community & social capital', 'Mentoring & networking'],
+  'org-uk-3': ['Mentoring & networking', 'Community & social capital', 'Policy, evidence & ecosystem influence'],
+  'org-uk-4': ['Mentoring & networking', 'Community & social capital', 'Policy, evidence & ecosystem influence'],
+  'org-uk-5': ['Mentoring & networking', 'Policy, evidence & ecosystem influence', 'Community & social capital'],
+  'org-uk-6': ['Mentoring & networking', 'Community & social capital'],
+  'org-uk-7': ['Policy, evidence & ecosystem influence', 'Community & social capital', 'Mentoring & networking'],
+  'org-uk-8': ['Policy, evidence & ecosystem influence', 'Mentoring & networking'],
+  'org-eng-9': ['Mentoring & networking', 'Policy, evidence & ecosystem influence'],
+  'org-eng-10': ['Mentoring & networking', 'Community & social capital'],
+  'org-eng-11': ['Community & social capital', 'Mentoring & networking', 'Policy, evidence & ecosystem influence'],
+  'org-eng-12': ['Community & social capital', 'Mentoring & networking'],
+  'org-scot-6': ['Mentoring & networking', 'Policy, evidence & ecosystem influence'],
+  'org-wales-5': ['Mentoring & networking', 'Community & social capital'],
+  'org-ni-5': ['Community & social capital', 'Mentoring & networking'],
+};
+
+export const RAW_ORGANISATIONS: Organisation[] = [
   // --- ENGLAND ---
   {
     id: 'org-eng-1',
@@ -957,6 +1052,14 @@ export const ORGANISATIONS: Organisation[] = [
   }
 ];
 
+export const ORGANISATIONS: Organisation[] = RAW_ORGANISATIONS.map((org) => ({
+  ...org,
+  crossCuttingPillars: PILLARS_BY_ORG_ID[org.id] || [
+    'Mentoring & networking',
+    'Community & social capital',
+  ],
+}));
+
 export const STAGES_LIST: StageOption[] = [
   'Awareness & ideation',
   'Incubator',
@@ -1043,36 +1146,57 @@ export const DEMOGRAPHIC_LABELS: Record<DemographicOption, { label: string; shor
   }
 };
 
-export const SECTOR_COLORS: Record<string, { hex: string; bgClass: string; textClass: string; dotClass: string; borderClass: string }> = {
+export const SECTOR_CONFIG: Record<
+  SectorOption,
+  {
+    hex: string;
+    bgClass: string;
+    textClass: string;
+    dotClass: string;
+    borderClass: string;
+    label: string;
+    shortLabel: string;
+  }
+> = {
   'Education / HE / FE': {
-    hex: '#26B7BD',
-    bgClass: 'bg-[#26B7BD]/10',
-    textClass: 'text-[#166e73]',
-    dotClass: 'bg-[#26B7BD]',
-    borderClass: 'border-[#26B7BD]/30'
+    hex: '#2563EB', // Blue
+    bgClass: 'bg-[#2563EB]/10',
+    textClass: 'text-[#2563EB]',
+    dotClass: 'bg-[#2563EB]',
+    borderClass: 'border-[#2563EB]/30',
+    label: 'Education / HE / FE',
+    shortLabel: 'Education / HE',
   },
   'VCSE / Community / Youth': {
-    hex: '#3EB049',
-    bgClass: 'bg-[#3EB049]/10',
-    textClass: 'text-[#2c8535]',
-    dotClass: 'bg-[#3EB049]',
-    borderClass: 'border-[#3EB049]/30'
+    hex: '#0D9488', // Teal
+    bgClass: 'bg-[#0D9488]/10',
+    textClass: 'text-[#0D9488]',
+    dotClass: 'bg-[#0D9488]',
+    borderClass: 'border-[#0D9488]/30',
+    label: 'VCSE / Community / Youth',
+    shortLabel: 'VCSE / Community',
   },
   'Local authority / Public body': {
-    hex: '#8A9091',
-    bgClass: 'bg-[#8A9091]/15',
-    textClass: 'text-[#51615a]',
-    dotClass: 'bg-[#8A9091]',
-    borderClass: 'border-[#8A9091]/30'
+    hex: '#D97706', // Warm Ochre / Amber
+    bgClass: 'bg-[#D97706]/10',
+    textClass: 'text-[#D97706]',
+    dotClass: 'bg-[#D97706]',
+    borderClass: 'border-[#D97706]/30',
+    label: 'Local authority / Public body',
+    shortLabel: 'Local authority',
   },
   'Employer / Private / Industry': {
-    hex: '#F69C1A',
-    bgClass: 'bg-[#F69C1A]/10',
-    textClass: 'text-[#b86b04]',
-    dotClass: 'bg-[#F69C1A]',
-    borderClass: 'border-[#F69C1A]/30'
-  }
+    hex: '#6366F1', // Indigo
+    bgClass: 'bg-[#6366F1]/10',
+    textClass: 'text-[#6366F1]',
+    dotClass: 'bg-[#6366F1]',
+    borderClass: 'border-[#6366F1]/30',
+    label: 'Employer / Private / Industry',
+    shortLabel: 'Private / Industry',
+  },
 };
+
+export const SECTOR_COLORS = SECTOR_CONFIG;
 
 export const STATUS_STYLES: Record<string, { hex: string; bg: string; text: string; dot: string }> = {
   'Active / Delivering now': {
