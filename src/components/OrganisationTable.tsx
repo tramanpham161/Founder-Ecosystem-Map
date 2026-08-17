@@ -22,6 +22,7 @@ export const OrganisationTable: React.FC<OrganisationTableProps> = ({
   const [sortField, setSortField] = useState<SortField>('number');
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
   const [copiedEmailId, setCopiedEmailId] = useState<string | null>(null);
+  const [visibleCount, setVisibleCount] = useState<number>(5);
 
   const handleCopyEmail = (e: React.MouseEvent, orgId: string, email: string) => {
     e.stopPropagation();
@@ -73,6 +74,22 @@ export const OrganisationTable: React.FC<OrganisationTableProps> = ({
 
     return list;
   }, [organisations, tableSearch, statusFilter, sortField, sortOrder]);
+
+  const displayedOrganisations = useMemo(() => {
+    return filteredAndSortedOrganisations.slice(0, visibleCount);
+  }, [filteredAndSortedOrganisations, visibleCount]);
+
+  const handleShowMore = () => {
+    setVisibleCount((prev) => prev + 5);
+  };
+
+  const handleShowAll = () => {
+    setVisibleCount(filteredAndSortedOrganisations.length);
+  };
+
+  const handleShowLess = () => {
+    setVisibleCount(5);
+  };
 
   const handleExportCSV = () => {
     const headers = [
@@ -130,7 +147,9 @@ export const OrganisationTable: React.FC<OrganisationTableProps> = ({
                 Full ecosystem directory & ledger
               </h2>
               <span className="text-[11px] font-semibold text-[#51615a] bg-[#fbfbf9] px-2 py-0.5 border border-[#e1e1db] rounded-md">
-                {filteredAndSortedOrganisations.length} listed
+                {filteredAndSortedOrganisations.length > 5
+                  ? `Showing ${displayedOrganisations.length} of ${filteredAndSortedOrganisations.length} listed`
+                  : `${filteredAndSortedOrganisations.length} listed`}
               </span>
             </div>
             <p className="text-xs text-[#51615a] mt-0.5">
@@ -219,14 +238,14 @@ export const OrganisationTable: React.FC<OrganisationTableProps> = ({
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#e5e5e0] text-xs">
-                {filteredAndSortedOrganisations.length === 0 ? (
+                {displayedOrganisations.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="py-10 text-center text-xs text-[#51615a]">
                       No organisations match the specified ledger query.
                     </td>
                   </tr>
                 ) : (
-                  filteredAndSortedOrganisations.map((org, index) => {
+                  displayedOrganisations.map((org, index) => {
                     const isSelected = selectedOrganisation?.id === org.id;
                     const sectorMeta = SECTOR_COLORS[org.sector] || { hex: '#26B7BD' };
                     const statusMeta = STATUS_STYLES[org.status] || {
@@ -341,6 +360,48 @@ export const OrganisationTable: React.FC<OrganisationTableProps> = ({
             </table>
           </div>
         </div>
+
+        {/* Show More / Show Less Controls */}
+        {filteredAndSortedOrganisations.length > 5 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+            <p className="text-xs text-[#51615a]">
+              Showing <span className="font-bold text-[#1a2521]">{displayedOrganisations.length}</span> of{' '}
+              <span className="font-bold text-[#1a2521]">{filteredAndSortedOrganisations.length}</span> organisations
+            </p>
+
+            <div className="flex items-center gap-2">
+              {visibleCount < filteredAndSortedOrganisations.length ? (
+                <>
+                  <button
+                    id="show-more-btn"
+                    onClick={handleShowMore}
+                    className="bg-[#26B7BD] hover:bg-[#1fa0a6] text-white px-4 py-2 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 shadow-2xs"
+                  >
+                    <span>Show more</span>
+                    <span className="text-[10px] opacity-90">↓</span>
+                  </button>
+
+                  <button
+                    id="show-all-btn"
+                    onClick={handleShowAll}
+                    className="bg-white hover:bg-[#f8f8f6] border border-[#d8d8d2] text-[#1a2521] px-3 py-2 rounded-lg text-xs font-semibold transition-colors"
+                  >
+                    Show all ({filteredAndSortedOrganisations.length})
+                  </button>
+                </>
+              ) : (
+                <button
+                  id="show-less-btn"
+                  onClick={handleShowLess}
+                  className="bg-white hover:bg-[#f8f8f6] border border-[#d8d8d2] text-[#1a2521] px-4 py-2 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5"
+                >
+                  <span>Show less (show 5)</span>
+                  <span className="text-[10px]">↑</span>
+                </button>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
