@@ -156,7 +156,7 @@ export const SendMessageModal: React.FC<SendMessageModalProps> = ({
 
               <button
                 type="submit"
-                className="px-4 py-1.5 bg-[#3EB049] hover:bg-[#34993e] text-white rounded-lg text-xs font-semibold transition-colors shadow-2xs"
+                className="px-4 py-1.5 bg-[#F79B1C] hover:bg-[#e08912] text-white rounded-lg text-xs font-semibold transition-colors shadow-2xs cursor-pointer"
               >
                 Send message
               </button>
