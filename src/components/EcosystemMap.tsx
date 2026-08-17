@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
-import { Organisation } from '../types';
-import { SECTOR_COLORS, STATUS_STYLES } from '../data/organisations';
+import { Organisation, SectorOption } from '../types';
+import { SECTOR_CONFIG, STATUS_STYLES } from '../data/organisations';
 
 interface EcosystemMapProps {
   organisations: Organisation[];
@@ -71,7 +71,11 @@ export const EcosystemMap: React.FC<EcosystemMapProps> = ({
 
     organisations.forEach((org) => {
       const isSelected = selectedOrganisation?.id === org.id;
-      const sectorStyle = SECTOR_COLORS[org.sector] || { hex: '#26B7BD' };
+      const sectorStyle = SECTOR_CONFIG[org.sector] || {
+        hex: '#2563EB',
+        bgClass: 'bg-[#2563EB]/10',
+        textClass: 'text-[#2563EB]',
+      };
       const statusStyle = STATUS_STYLES[org.status] || {
         hex: '#3EB049',
         text: 'text-[#2c8535]',
@@ -87,10 +91,10 @@ export const EcosystemMap: React.FC<EcosystemMapProps> = ({
             background-color: ${sectorStyle.hex};
             border: 2px solid #ffffff;
             border-radius: 9999px;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
             transition: transform 0.2s ease;
             cursor: pointer;
-            ${isSelected ? 'box-shadow: 0 0 0 4px rgba(38, 183, 189, 0.5); transform: scale(1.15);' : ''}
+            ${isSelected ? `box-shadow: 0 0 0 4px ${sectorStyle.hex}66; transform: scale(1.15);` : ''}
           "></div>
         `,
         iconSize: [markerSize, markerSize],
@@ -105,20 +109,25 @@ export const EcosystemMap: React.FC<EcosystemMapProps> = ({
 
       // Simplified popup without nested boxes
       const popupHtml = `
-        <div style="font-family: system-ui, -apple-system, sans-serif; width: 230px; padding: 12px; background: #ffffff; border-radius: 8px;">
+        <div style="font-family: system-ui, -apple-system, sans-serif; width: 235px; padding: 12px; background: #ffffff; border-radius: 8px;">
           <div style="display: flex; align-items: center; justify-content: space-between; gap: 4px; margin-bottom: 6px;">
-            <span style="font-size: 10px; font-weight: 600; color: #51615a;">
-              ${org.locationDisplay}
-            </span>
+            <div style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: #1a2521;">
+              <span style="width: 7px; height: 7px; border-radius: 9999px; background-color: ${sectorStyle.hex}; display: inline-block;"></span>
+              <span>${org.sector}</span>
+            </div>
             <div style="display: flex; align-items: center; gap: 4px; font-size: 10px; color: ${statusStyle.hex}; font-weight: 600;">
               <span style="width: 6px; height: 6px; border-radius: 9999px; background-color: ${statusStyle.hex}; display: inline-block;"></span>
               <span>${org.status.split('/')[0].trim()}</span>
             </div>
           </div>
 
-          <h4 style="font-size: 13px; font-weight: 700; color: #1a2521; line-height: 1.25; margin: 0 0 6px 0;">
+          <h4 style="font-size: 13px; font-weight: 700; color: #1a2521; line-height: 1.25; margin: 0 0 4px 0;">
             ${org.name}
           </h4>
+
+          <div style="font-size: 10px; color: #51615a; margin-bottom: 6px;">
+            📍 ${org.locationDisplay}
+          </div>
 
           <p style="font-size: 11px; color: #51615a; line-height: 1.35; margin: 0 0 10px 0;">
             ${org.activeInitiative}
@@ -217,6 +226,8 @@ export const EcosystemMap: React.FC<EcosystemMapProps> = ({
     }
   };
 
+  const sectorEntries = Object.keys(SECTOR_CONFIG) as SectorOption[];
+
   return (
     <div className="bg-white border border-[#e1e1db] rounded-xl overflow-hidden shadow-xs flex flex-col h-[540px] relative">
       {/* Map Header Bar */}
@@ -263,28 +274,32 @@ export const EcosystemMap: React.FC<EcosystemMapProps> = ({
       <div className="relative flex-1 w-full h-full">
         <div ref={mapContainerRef} className="w-full h-full z-0" />
 
-        {/* Sector Legend (OAHA Palette) */}
-        <div className="absolute bottom-3 left-3 z-10 bg-white/95 backdrop-blur-xs border border-[#e1e1db] rounded-lg p-2.5 shadow-xs max-w-[220px]">
-          <div className="text-[10px] font-bold text-[#51615a] mb-1.5">
-            Sector legend
+        {/* Sector Legend */}
+        <div className="absolute bottom-3 left-3 z-10 bg-white/95 backdrop-blur-xs border border-[#e1e1db] rounded-lg p-2.5 shadow-sm max-w-[240px]">
+          <div className="flex items-center justify-between gap-1 mb-1.5 pb-1 border-b border-[#e5e5e0]">
+            <span className="text-[10px] font-bold text-[#1a2521] uppercase tracking-wider">
+              Sector Legend
+            </span>
+            <span className="text-[9px] text-[#51615a] font-medium">
+              Map pin color
+            </span>
           </div>
-          <div className="space-y-1 text-[11px] text-[#1a2521]">
-            <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#26B7BD] shrink-0"></span>
-              <span className="truncate">Education / HE / FE</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#3EB049] shrink-0"></span>
-              <span className="truncate">VCSE / Community / Youth</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#8A9091] shrink-0"></span>
-              <span className="truncate">Local authority / Public body</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#F69C1A] shrink-0"></span>
-              <span className="truncate">Employer / Private / Industry</span>
-            </div>
+
+          <div className="space-y-1.5 text-[11px]">
+            {sectorEntries.map((sector) => {
+              const cfg = SECTOR_CONFIG[sector];
+              return (
+                <div key={sector} className="flex items-center gap-2">
+                  <span
+                    className="w-2.5 h-2.5 rounded-full shrink-0 ring-1 ring-white"
+                    style={{ backgroundColor: cfg.hex }}
+                  />
+                  <span className="text-[#1a2521] font-medium truncate text-[11px]">
+                    {cfg.label}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
