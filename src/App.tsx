@@ -71,16 +71,10 @@ export default function App() {
   // Primary filtering logic
   const filteredOrganisations = useMemo(() => {
     return ORGANISATIONS.filter((org) => {
-      // 1. Location match
+      // 1. Location match: strictly match selected regions unless "UK" or none selected
       if (selectedLocations.length > 0) {
         if (!selectedLocations.includes('UK')) {
-          const matchNation = selectedLocations.some((loc) => {
-            if (loc === 'England' && (org.nation === 'England' || org.nation === 'UK-Wide')) return true;
-            if (loc === 'Scotland' && (org.nation === 'Scotland' || org.nation === 'UK-Wide')) return true;
-            if (loc === 'Wales' && (org.nation === 'Wales' || org.nation === 'UK-Wide')) return true;
-            if (loc === 'Northern Ireland' && (org.nation === 'Northern Ireland' || org.nation === 'UK-Wide')) return true;
-            return false;
-          });
+          const matchNation = selectedLocations.some((loc) => org.nation === loc);
           if (!matchNation) return false;
         }
       }
@@ -116,17 +110,23 @@ export default function App() {
     });
   }, [selectedLocations, selectedDemographics, selectedStage, searchQuery]);
 
+  // Ensure selected organisation is reset if it no longer matches active filters
+  React.useEffect(() => {
+    if (selectedOrganisation) {
+      const stillExists = filteredOrganisations.some(
+        (org) => org.id === selectedOrganisation.id
+      );
+      if (!stillExists) {
+        setSelectedOrganisation(null);
+      }
+    }
+  }, [filteredOrganisations, selectedOrganisation]);
+
   // Compute Stage Counts based on currently active filtered organisations
   const stageCounts = useMemo(() => {
     const baseFiltered = ORGANISATIONS.filter((org) => {
       if (selectedLocations.length > 0 && !selectedLocations.includes('UK')) {
-        const matchNation = selectedLocations.some((loc) => {
-          if (loc === 'England' && (org.nation === 'England' || org.nation === 'UK-Wide')) return true;
-          if (loc === 'Scotland' && (org.nation === 'Scotland' || org.nation === 'UK-Wide')) return true;
-          if (loc === 'Wales' && (org.nation === 'Wales' || org.nation === 'UK-Wide')) return true;
-          if (loc === 'Northern Ireland' && (org.nation === 'Northern Ireland' || org.nation === 'UK-Wide')) return true;
-          return false;
-        });
+        const matchNation = selectedLocations.some((loc) => org.nation === loc);
         if (!matchNation) return false;
       }
       if (selectedDemographics.length > 0) {
