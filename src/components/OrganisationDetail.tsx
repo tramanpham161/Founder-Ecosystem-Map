@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Organisation } from '../types';
-import { SECTOR_COLORS, STATUS_STYLES, DEMOGRAPHIC_LABELS } from '../data/organisations';
+import { SECTOR_CONFIG, STATUS_STYLES, DEMOGRAPHIC_LABELS } from '../data/organisations';
 
 interface OrganisationDetailProps {
   organisation: Organisation | null;
@@ -68,9 +68,10 @@ export const OrganisationDetail: React.FC<OrganisationDetailProps> = ({
     );
   }
 
-  const sectorMeta = SECTOR_COLORS[organisation.sector] || {
-    hex: '#26B7BD',
-    textClass: 'text-[#166e73]',
+  const sectorMeta = SECTOR_CONFIG[organisation.sector] || {
+    hex: '#2563EB',
+    bgClass: 'bg-[#2563EB]/10',
+    textClass: 'text-[#2563EB]',
   };
 
   const statusMeta = STATUS_STYLES[organisation.status] || {
@@ -85,16 +86,16 @@ export const OrganisationDetail: React.FC<OrganisationDetailProps> = ({
         <div className="flex items-start justify-between gap-3">
           <div>
             <div className="flex items-center gap-3 flex-wrap mb-1.5">
-              {/* Sector indicator */}
+              {/* Sector indicator following legend */}
               <div className="flex items-center gap-1.5 text-xs font-semibold text-[#1a2521]">
                 <span
-                  className="w-2.5 h-2.5 rounded-full shrink-0"
+                  className="w-2 h-2 rounded-full shrink-0"
                   style={{ backgroundColor: sectorMeta.hex }}
-                ></span>
+                />
                 <span>{organisation.sector}</span>
               </div>
 
-              {/* Status indicator (Dot + text, no boxed border) */}
+              {/* Status indicator (Dot + text) */}
               <div className="flex items-center gap-1.5 text-xs font-semibold text-[#51615a]">
                 <span
                   className="w-2 h-2 rounded-full shrink-0"
@@ -187,6 +188,25 @@ export const OrganisationDetail: React.FC<OrganisationDetailProps> = ({
             {organisation.stages.join(' • ')}
           </p>
         </div>
+
+        {/* Continuous Support Tracks */}
+        {organisation.crossCuttingPillars && organisation.crossCuttingPillars.length > 0 && (
+          <div className="border-t border-[#e5e5e0] pt-3">
+            <span className="text-xs font-semibold text-[#51615a] block mb-1">
+              Continuous support tracks (Stages 01–05)
+            </span>
+            <div className="flex flex-wrap gap-1.5 mt-1">
+              {organisation.crossCuttingPillars.map((pillar) => (
+                <span
+                  key={pillar}
+                  className="text-[11px] font-semibold text-[#1a2521] bg-[#f4f4f0] border border-[#d8d8d2] px-2 py-0.5 rounded"
+                >
+                  {pillar}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Demographic Focus (Clean text format) */}
         <div className="border-t border-[#e5e5e0] pt-3">
