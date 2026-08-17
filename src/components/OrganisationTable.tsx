@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Organisation } from '../types';
-import { SECTOR_COLORS, STATUS_STYLES } from '../data/organisations';
+import { SECTOR_CONFIG, STATUS_STYLES } from '../data/organisations';
 
 interface OrganisationTableProps {
   organisations: Organisation[];
@@ -103,6 +103,7 @@ export const OrganisationTable: React.FC<OrganisationTableProps> = ({
       'Email',
       'Website',
       'Supported Stages',
+      'Continuous Support Tracks',
       'Founder Demographics',
       'Looking For',
       'Status',
@@ -120,6 +121,7 @@ export const OrganisationTable: React.FC<OrganisationTableProps> = ({
       `"${org.email}"`,
       `"${org.website}"`,
       `"${org.stages.join('; ')}"`,
+      `"${(org.crossCuttingPillars || []).join('; ')}"`,
       `"${org.demographics.join('; ')}"`,
       `"${org.lookingFor.replace(/"/g, '""')}"`,
       `"${org.status}"`,
@@ -247,7 +249,11 @@ export const OrganisationTable: React.FC<OrganisationTableProps> = ({
                 ) : (
                   displayedOrganisations.map((org, index) => {
                     const isSelected = selectedOrganisation?.id === org.id;
-                    const sectorMeta = SECTOR_COLORS[org.sector] || { hex: '#26B7BD' };
+                    const sectorMeta = SECTOR_CONFIG[org.sector] || {
+                      hex: '#2563EB',
+                      bgClass: 'bg-[#2563EB]/10',
+                      textClass: 'text-[#2563EB]',
+                    };
                     const statusMeta = STATUS_STYLES[org.status] || {
                       hex: '#3EB049',
                       text: 'text-[#2c8535]',
@@ -274,14 +280,12 @@ export const OrganisationTable: React.FC<OrganisationTableProps> = ({
                           <div className="font-semibold text-[#1a2521] leading-tight">
                             {org.name}
                           </div>
-                          <div className="flex items-center gap-1.5 mt-0.5">
+                          <div className="flex items-center gap-1.5 mt-1 text-[11px] font-medium text-[#51615a]">
                             <span
                               className="w-2 h-2 rounded-full shrink-0"
                               style={{ backgroundColor: sectorMeta.hex }}
-                            ></span>
-                            <span className="text-[11px] text-[#51615a]">
-                              {org.sector}
-                            </span>
+                            />
+                            <span>{org.sector}</span>
                           </div>
                         </td>
 
