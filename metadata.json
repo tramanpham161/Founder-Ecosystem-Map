@@ -1,0 +1,6 @@
+{
+  "name": "Founder Ecosystem & Stage Map",
+  "description": "Interactive map and ecosystem directory tracking founder support organisations, stages, locations, and demographic focus across the UK.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
